@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group 'com.ppobot'
+//sourceCompatibility = '14'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.4.2'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.4.2'
+    implementation 'org.springframework.boot:spring-boot-starter-test:2.6.7'
+    implementation 'org.springframework.data:spring-data-commons:2.7.0'
+    implementation 'org.postgresql:postgresql:42.3.1'
+    implementation 'mysql:mysql-connector-java:5.1.43'
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.6.4'
+    implementation group: 'org.telegram', name: 'telegrambots-abilities', version: '4.0.0'
+    implementation group: 'org.telegram', name: 'telegrambots', version: '4.0.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+}
+
+test {
+    useJUnitPlatform()
+}
