@@ -6,9 +6,11 @@ import com.ppobot.entity.ExecutorSkill;
 import com.ppobot.entity.Request;
 import com.ppobot.entity.RequestForUser;
 import com.ppobot.entity.User;
+import com.ppobot.repository.RequestRepository;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -116,19 +118,22 @@ public class TgBot extends TelegramLongPollingBot {
                     break;
                 case "/change_time":
                     curCommand = "change_time";
-                    defaultMsg(response, "Вееди новый срок истечения в формате 'гггг-мм-дд чч:мм'");
+                    defaultMsg(response, "Введи номер заявки и новый срок истечения в формате 'гггг-мм-дд чч:мм'\n" +
+                            "Пример:\n3\n2022-10-01 16:00");
                     break;
                 case "/change_prof":
                     curCommand = "change_prof";
-                    defaultMsg(response, "Введи новый необходимый проф. навык");
+                    defaultMsg(response, "Введи номер заявки и новый необходимый проф. навык\nПример:\n3\n" +
+                            "столяр");
                     break;
                 case "/change_explanation":
                     curCommand = "change_explanation";
-                    defaultMsg(response, "Введи новое пояснение");
+                    defaultMsg(response, "Введи номер заявки и новое пояснение\nПример:\n3\nхочется сладкого");
                     break;
                 case "/change_equipment":
                     curCommand = "change_equipment";
-                    defaultMsg(response, "Введи новое необходимое оборудование");
+                    defaultMsg(response, "Введи номер заявки и новое необходимое оборудование\nПример:\n3\n" +
+                            "табуретка");
                     break;
                 case "/get_request_on_my_skill":
                     curCommand = "get_request_on_my_skill";
@@ -465,9 +470,19 @@ public class TgBot extends TelegramLongPollingBot {
 
     private void newRequest(Update update) throws TelegramApiException {
         String[] params = update.getMessage().getText().split("\n");
-        if (params.length < 5) {
+        if (params.length < 2) {
             defaultMsg(response, "Недостаточно параметров. Введи команду заново.");
         } else {
+            if (params.length < 5) {
+                String[] tmp = new String[5];
+                for (int i = 0; i < params.length; i++) {
+                    tmp[i] = params[i];
+                }
+                for (int i = params.length; i < 5; i++) {
+                    tmp[i] = "";
+                }
+                params = tmp;
+            }
             String title = params[0];
             String period = params[1];
             String explanation = params[2];
@@ -476,6 +491,11 @@ public class TgBot extends TelegramLongPollingBot {
             int res;
             if (userController.getConnection(message.getFrom()) == 1) {
                 res = requestController.createRequest(message.getFrom(), title, period, explanation, prof, equipment);
+//                if (requestController.requestByID(res).getStatus().equals("BANNED")) {
+//                    res = HttpStatus.SC_NOT_FOUND;
+//                } else {
+//                    res = HttpStatus.SC_OK;
+//                }
             } else {
                 res = HttpStatus.SC_METHOD_NOT_ALLOWED;
             }
@@ -486,6 +506,9 @@ public class TgBot extends TelegramLongPollingBot {
                 case HttpStatus.SC_METHOD_NOT_ALLOWED:
                     defaultMsg(response, "Вы не обладаете правами на эту заявку или текущееподключение не " +
                             "соответствует роли customer");
+                    break;
+                case HttpStatus.SC_NOT_FOUND:
+                    defaultMsg(response, "Так нехорошо делать. Создайте заявку без нецензурной лексики");
                     break;
                 default:
                     defaultMsg(response, "Заяввка создана успешно!");

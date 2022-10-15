@@ -32,6 +32,10 @@ public class RequestService extends BaseService {
     @Autowired
     protected final EquipmentSkillRepository eqSkillRepo;
 
+    public Request requestByID(int id) {
+        return repo.getById(id);
+    }
+
     public Request createRequest(String title, Timestamp periodOfRelevance, String explanation,
                               String profNecessity, String equipmentName, String owner) {
         int skillId = 0;
@@ -215,6 +219,16 @@ public class RequestService extends BaseService {
         repo.update(req);
         return req;
     }
+
+//    public List<Request> requestsByStatus(String userTgName, String status) throws NotFoundException {
+//        List<Request> reqs = repo.getByStatus(status);
+//        if (reqs == null || !req.getExecutor().equals(userTgName)) {
+//            throw new NotFoundException();
+//        }
+//        req.setStatus(Request.ReqStatus.DONE);
+//        repo.update(req);
+//        return req;
+//    }
 
     public List<RequestForUser> requestsByOwner(String userTgName) throws NotFoundException {
         List<RequestForUser> reqs = repo.getByOwner(userTgName);

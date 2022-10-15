@@ -34,6 +34,7 @@ public class RequestForUser {
         IN_PROCESS,
         DONE,
         CLOSED,
-        ELAPSED
+        ELAPSED,
+        BANNED
     }
 }

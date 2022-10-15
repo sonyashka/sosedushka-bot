@@ -36,6 +36,7 @@ public class Request {
         IN_PROCESS,
         DONE,
         CLOSED,
-        ELAPSED
+        ELAPSED,
+        BANNED
     }
 }

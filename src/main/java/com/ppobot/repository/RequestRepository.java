@@ -1,5 +1,8 @@
 package com.ppobot.repository;
 
+import com.mysql.jdbc.Connection;
+//import com.mysql.jdbc.PreparedStatement;
+import java.sql.PreparedStatement;
 import com.ppobot.entity.ExecutorSkill;
 import com.ppobot.entity.Request;
 import com.ppobot.entity.RequestForUser;
@@ -10,8 +13,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -64,8 +71,9 @@ public class RequestRepository {
                             "e.name as equipment, executor as user, " +
                             "status from " + schema + "request as r left join " + schema + "skill as s on r.profNecessity=s.id " +
                             "left join "
-                            + schema +"equipment as e on r.equipment=e.id where owner=? and status not in (?, ?)",
-                    REQUEST_FOR_USER_MAPPER, ownerTgName, Request.ReqStatus.DONE.toString(), Request.ReqStatus.ELAPSED.toString());
+                            + schema +"equipment as e on r.equipment=e.id where owner=? and status not in (?, ?, ?, ?)",
+                    REQUEST_FOR_USER_MAPPER, ownerTgName, Request.ReqStatus.DONE.toString(), Request.ReqStatus.ELAPSED.toString(), Request.ReqStatus.BANNED.toString(),
+                    Request.ReqStatus.CLOSED.toString());
         } catch (DataAccessException exception) {
             throw new DbException(exception);
         }
@@ -77,8 +85,9 @@ public class RequestRepository {
                             "e.name as equipment, owner as user, " +
                             "status from " + schema + "request as r left join " + schema + "skill as s on r.profNecessity=s.id " +
                             "left join "
-                            + schema +"equipment as e on r.equipment=e.id where executor=? and status not in (?, ?)",
-                    REQUEST_FOR_USER_MAPPER, executorTgName, Request.ReqStatus.DONE.toString(), Request.ReqStatus.ELAPSED.toString());
+                            + schema +"equipment as e on r.equipment=e.id where executor=? and status not in (?, ?, ?, ?)",
+                    REQUEST_FOR_USER_MAPPER, executorTgName, Request.ReqStatus.DONE.toString(), Request.ReqStatus.ELAPSED.toString(), Request.ReqStatus.BANNED.toString(),
+                    Request.ReqStatus.CLOSED.toString());
         } catch (DataAccessException exception) {
             throw new DbException(exception);
         }
@@ -109,8 +118,11 @@ public class RequestRepository {
         }
     }
 
+
+
     public void insert(Request entity) throws DbException {
         try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
             var result = template.update("insert into " + schema + "request (title, periodOfRelevance, " +
                             "explanation, profNecessity, equipment, owner, executor, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
                     entity.getTitle(),
@@ -121,6 +133,31 @@ public class RequestRepository {
                     entity.getOwner(),
                     entity.getExecutor(),
                     entity.getStatus().toString());
+//            template.update(new PreparedStatementCreator() {
+//                @Override
+//                public PreparedStatement createPreparedStatement(java.sql.Connection con) throws SQLException {
+//                    return null;
+//                }
+//
+//                public PreparedStatement createPreparedStatement(
+//                        Connection connection) throws SQLException {
+//                            PreparedStatement ps = connection.prepareStatement(
+//                                    "insert into " + schema + "request (title, periodOfRelevance, " +
+//                                            "explanation, profNecessity, equipment, owner, executor, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
+//                                            new String[] {"id"});
+//                            ps.setString(1, entity.getTitle());
+//                            ps.setTimestamp(2, entity.getPeriodOfRelevance());
+//                            ps.setString(3, entity.getExplanation());
+//                            ps.setInt(4, entity.getProfNecessity() == 0 ? null : entity.getProfNecessity());
+//                            ps.setInt(5, entity.getEquipment() == 0 ? null : entity.getEquipment());
+//                            ps.setString(6, entity.getOwner());
+//                            ps.setString(7, entity.getExecutor());
+//                            ps.setString(8, entity.getStatus().toString()));
+//                            return ps;
+//                }}, keyHolder);
+//            });
+//            return keyHolder.getKey();
+//            return 0;
         } catch (DataAccessException exception) {
             throw new DbException(exception);
         }

@@ -28,6 +28,7 @@ public class RequestController {
     @Autowired
     private RequestCheck requestCheck;
 
+
     public int createRequest(User user, String title, String periodOfRelevanceStr, String explanation,
                              String profNecessity, String equipment) {
         try {
@@ -35,6 +36,7 @@ public class RequestController {
             Timestamp periodOfRelevance = requestCheck.periodOfRelevanceCheck(periodOfRelevanceStr);
             requestService.createRequest(title, periodOfRelevance, explanation, profNecessity, equipment, user.getUserName());
             return HttpStatus.SC_OK;
+//            return key;
         } catch (DataException e) {
             return HttpStatus.SC_METHOD_FAILURE;
         }
@@ -143,6 +145,15 @@ public class RequestController {
             return HttpStatus.SC_METHOD_FAILURE;
         } catch (NotFoundException ne) {
             return HttpStatus.SC_NOT_FOUND;
+        }
+    }
+
+    public Request requestByID(int id) {
+        try {
+            Request req = requestService.requestByID(id);
+            return req;
+        } catch (NotFoundException e) {
+            return null;
         }
     }
 
